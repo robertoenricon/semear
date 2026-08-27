@@ -8,6 +8,7 @@ import {
 } from '../utils/date';
 import { CATEGORIES, CATEGORY_LIST } from '../utils/categories';
 import { ENTRY_TYPES, getTypeListByCategory } from '../utils/entryTypes';
+import { normalizeText } from '../utils/text';
 import CategoryIcon from './CategoryIcon';
 import Calendar from './Calendar';
 
@@ -123,15 +124,16 @@ export default function EntryList({
         return parsed.body.textContent || '';
     };
 
-    // Filtra os registros pelo título, descrição e feedback (sem diferenciar maiúsculas).
-    const query = search.trim().toLowerCase();
+    // Filtra os registros pelo título, descrição e feedback, sem diferenciar
+    // maiúsculas nem acentuação (ex.: "robo" encontra "robô").
+    const query = normalizeText(search.trim());
     const matched = query
         ? entries.filter((entry) => {
-            const haystack = [
+            const haystack = normalizeText([
                 entry.title || '',
                 getPlainText(entry.content),
                 getPlainText(entry.feedback),
-            ].join(' ').toLowerCase();
+            ].join(' '));
             return haystack.includes(query);
         })
         : entries;
