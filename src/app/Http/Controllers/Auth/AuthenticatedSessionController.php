@@ -41,7 +41,7 @@ class AuthenticatedSessionController extends Controller
             RateLimiter::hit($throttleKey, 60);
 
             throw ValidationException::withMessages([
-                'name' => 'Nome ou senha inválidos.',
+                'name' => 'Usuário ou senha inválidos.',
             ]);
         }
 
