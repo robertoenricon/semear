@@ -254,6 +254,65 @@ body {
     margin-top: 0.4rem;
 }
 
+/* Texto auxiliar exibido abaixo dos campos do formulário. */
+.login-form__hint {
+    margin: 0.4rem 0 0;
+    color: var(--semear-faint);
+    font-size: 0.78rem;
+}
+
+/* Aviso informativo (ex.: conta criada) exibido acima do formulário. */
+.login-card__notice {
+    border: 0;
+    margin-bottom: 1rem;
+    color: var(--semear-text);
+    background-color: var(--semear-terapia-soft);
+}
+
+/* Rodapé do cartão: leva o usuário entre as telas de login e cadastro. */
+.login-card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--semear-border);
+}
+
+.login-card__footer-text {
+    color: var(--semear-muted);
+    font-size: 0.9rem;
+}
+
+/* Botão secundário (contorno) usado no rodapé do cartão. */
+.login-card__secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--semear-terapia);
+    border-radius: 0.75rem;
+    color: var(--semear-terapia);
+    background-color: transparent;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s, background-color 0.15s, transform 0.15s;
+}
+
+.login-card__secondary-btn:hover,
+.login-card__secondary-btn:focus {
+    color: #0a1014;
+    background-color: var(--semear-terapia);
+    transform: translateY(-1px);
+}
+
+.login-card__secondary-btn:focus-visible {
+    outline: 2px solid var(--semear-sonhos);
+    outline-offset: 2px;
+}
+
 /* ------------------------------------------------------------------ */
 /* Estrutura geral                                                   */
 /* ------------------------------------------------------------------ */

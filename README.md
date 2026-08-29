@@ -106,6 +106,7 @@ php artisan migrate
 ### 7. Acesse a aplicação
 
 - Login: http://localhost:8080/login
+- Cadastro: http://localhost:8080/register
 - Semear: http://localhost:8080/semear
 - MySQL: `localhost:3306` (usuário `semear`, senha `secret`)
 
@@ -121,6 +122,17 @@ ADMIN_PASSWORD=pass
 
 Altere a senha antes de usar a aplicação fora do ambiente local. O login usa
 sessão armazenada no MySQL, e as rotas do Semear e da API exigem autenticação.
+
+### Criação de conta
+
+A tela de login traz o botão **Registre-se**, que leva ao formulário de
+cadastro (`/register`). Nele o usuário informa um nome (único no sistema, usado
+para entrar) e uma senha de no mínimo 8 caracteres, com confirmação. Ao concluir
+o cadastro a sessão já é iniciada e o usuário segue direto para o Semear.
+
+Cada conta é independente: todo registro criado fica vinculado ao usuário
+autenticado (`journal_entries.user_id`) e as consultas da API são sempre
+filtradas por ele, de modo que um usuário nunca enxerga os registros de outro.
 
 ---
 
