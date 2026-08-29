@@ -25,7 +25,7 @@
             @csrf
 
             <div>
-                <label for="name" class="login-form__label">Nome</label>
+                <label for="name" class="login-form__label">Usuário</label>
                 <input
                     id="name"
                     name="name"
