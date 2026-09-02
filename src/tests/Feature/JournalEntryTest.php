@@ -49,6 +49,67 @@ class JournalEntryTest extends TestCase
         ]);
     }
 
+    public function test_it_sanitizes_rich_text_when_creating_an_entry(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson('/api/journal-entries', [
+            'entry_date' => '2026-06-17',
+            'category' => 'sonhos',
+            'content' => '<p onclick="alert(1)">Oi <strong>seguro</strong><script>alert(1)</script><img src=x onerror=alert(1)><a href="javascript:alert(1)">link</a><svg><animate onbegin=alert(1) /></svg></p>',
+            'feedback' => '<div style="background:url(javascript:alert(1))">Feedback <em onmouseover="alert(1)">seguro</em></div>',
+        ]);
+
+        $response->assertCreated();
+
+        $content = $response->json('content');
+        $feedback = $response->json('feedback');
+
+        $this->assertStringContainsString('<strong>seguro</strong>', $content);
+        $this->assertStringContainsString('<em>seguro</em>', $feedback);
+        $this->assertStringNotContainsString('<script', $content);
+        $this->assertStringNotContainsString('<img', $content);
+        $this->assertStringNotContainsString('<a', $content);
+        $this->assertStringNotContainsString('<svg', $content);
+        $this->assertStringNotContainsString('onclick', $content);
+        $this->assertStringNotContainsString('onmouseover', $feedback);
+        $this->assertStringNotContainsString('style=', $feedback);
+
+        $this->assertDatabaseHas('journal_entries', [
+            'user_id' => $user->id,
+            'content' => $content,
+            'feedback' => $feedback,
+        ]);
+    }
+
+    public function test_it_sanitizes_legacy_rich_text_when_listing_entries(): void
+    {
+        $user = User::factory()->create();
+
+        DB::table('journal_entries')->insert([
+            'user_id' => $user->id,
+            'entry_date' => '2026-06-17 00:00:00',
+            'category' => 'sonhos',
+            'content' => '<p onclick="alert(1)">Legado<script>alert(1)</script></p>',
+            'feedback' => '<img src=x onerror=alert(1)>Feedback',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->getJson('/api/journal-entries')
+            ->assertOk()
+            ->assertJsonCount(1);
+
+        $content = $response->json('0.content');
+        $feedback = $response->json('0.feedback');
+
+        $this->assertStringNotContainsString('<script', $content);
+        $this->assertStringNotContainsString('onclick', $content);
+        $this->assertStringNotContainsString('<img', $feedback);
+        $this->assertStringNotContainsString('onerror', $feedback);
+    }
+
     public function test_it_updates_an_existing_entry_by_id(): void
     {
         $user = User::factory()->create();
@@ -71,6 +132,39 @@ class JournalEntryTest extends TestCase
         $this->assertDatabaseHas('journal_entries', [
             'id' => $entry->id,
             'content' => 'Conteúdo alterado',
+        ]);
+    }
+
+    public function test_it_sanitizes_rich_text_when_updating_an_entry(): void
+    {
+        $user = User::factory()->create();
+        $entry = JournalEntry::factory()->for($user)->create([
+            'category' => 'sonhos',
+            'entry_date' => '2026-06-17',
+            'content' => 'Conteudo antigo',
+        ]);
+
+        $response = $this->actingAs($user)->putJson("/api/journal-entries/{$entry->id}", [
+            'entry_date' => '2026-06-17',
+            'content' => '<div onmouseover="alert(1)">Novo <b>conteudo</b><iframe src="https://example.com"></iframe></div>',
+            'feedback' => '<u onclick="alert(1)">Feedback</u>',
+        ]);
+
+        $response->assertOk();
+
+        $content = $response->json('content');
+        $feedback = $response->json('feedback');
+
+        $this->assertStringContainsString('<strong>conteudo</strong>', $content);
+        $this->assertStringContainsString('<u>Feedback</u>', $feedback);
+        $this->assertStringNotContainsString('onmouseover', $content);
+        $this->assertStringNotContainsString('<iframe', $content);
+        $this->assertStringNotContainsString('onclick', $feedback);
+
+        $this->assertDatabaseHas('journal_entries', [
+            'id' => $entry->id,
+            'content' => $content,
+            'feedback' => $feedback,
         ]);
     }
 

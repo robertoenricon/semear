@@ -8,6 +8,7 @@ import {
 } from '../utils/date';
 import { CATEGORIES, CATEGORY_LIST } from '../utils/categories';
 import { ENTRY_TYPES, getTypeListByCategory } from '../utils/entryTypes';
+import { sanitizeRichTextHtml } from '../utils/html';
 import { normalizeText } from '../utils/text';
 import CategoryIcon from './CategoryIcon';
 import Calendar from './Calendar';
@@ -159,29 +160,6 @@ export default function EntryList({
     const hasMore = ordered.length > visibleCount;
     // Indica que a lista foi expandida além da primeira página (habilita o "Ver menos").
     const canCollapse = visibleCount > PAGE_SIZE;
-
-    // Sanitiza o HTML do registro preservando a formatação do editor (negrito,
-    // itálico, listas, emojis) e removendo conteúdo perigoso, sem limitar o
-    // número de caracteres exibidos.
-    const sanitizeHtml = (html) => {
-        const parsed = new DOMParser().parseFromString(html || '', 'text/html');
-
-        // Remove elementos perigosos.
-        parsed.body.querySelectorAll('script, style, iframe, object, embed').forEach((node) => node.remove());
-
-        // Remove handlers de evento e URLs com javascript:.
-        parsed.body.querySelectorAll('*').forEach((node) => {
-            [...node.attributes].forEach((attr) => {
-                const name = attr.name.toLowerCase();
-                const value = attr.value.replace(/\s+/g, '').toLowerCase();
-                if (name.startsWith('on') || ((name === 'href' || name === 'src') && value.startsWith('javascript:'))) {
-                    node.removeAttribute(attr.name);
-                }
-            });
-        });
-
-        return parsed.body.innerHTML;
-    };
 
     // Tags de bloco que, ao se sucederem, representam uma quebra de linha.
     const BLOCK_TAGS = /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|DD|DIV|DL|DT|FIELDSET|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|PRE|SECTION|TABLE|UL)$/;
@@ -440,7 +418,7 @@ export default function EntryList({
                                         {getPlainText(entry.content).trim() ? (
                                             <span
                                                 className="semear-entry-card__long"
-                                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(getFirstLineHtml(entry.content)) }}
+                                                dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(getFirstLineHtml(entry.content)) }}
                                             />
                                         ) : (
                                             <span className="semear-entry-card__long">Sem descrição</span>
@@ -489,12 +467,12 @@ export default function EntryList({
                                     {hasFeedback ? (
                                         <div
                                             className="semear-entry-card__description"
-                                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.feedback) }}
+                                            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(entry.feedback) }}
                                         />
                                     ) : getPlainText(entry.content).trim() ? (
                                         <div
                                             className="semear-entry-card__description"
-                                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.content) }}
+                                            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(entry.content) }}
                                         />
                                     ) : (
                                         <div className="semear-entry-card__description">
