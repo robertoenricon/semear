@@ -20,7 +20,7 @@ O ambiente é composto por três containers:
 |---------|-------------------|-------------------------------------|--------------|
 | `app`   | PHP 8.3-FPM       | Executa a aplicação Laravel         | —            |
 | `nginx` | Nginx 1.27        | Servidor web (serve estáticos + PHP)| `8080`       |
-| `db`    | MySQL 8.0         | Banco de dados                      | `3306`       |
+| `db`    | MySQL 8.0         | Banco de dados                      | —            |
 
 A aplicação Laravel fica no diretório `src/`, mantendo a infraestrutura Docker
 separada do código do app.
@@ -87,7 +87,7 @@ DB_HOST=db
 DB_PORT=3306
 DB_DATABASE=semear
 DB_USERNAME=semear
-DB_PASSWORD=secret
+DB_PASSWORD=troque-por-uma-senha-forte-do-app
 ```
 
 > **Importante:** `DB_HOST` deve ser `db` (nome do serviço no Compose).
@@ -108,7 +108,16 @@ php artisan migrate
 - Login: http://localhost:8080/login
 - Cadastro: http://localhost:8080/register
 - Semear: http://localhost:8080/semear
-- MySQL: `localhost:3306` (usuário `semear`, senha `secret`)
+- MySQL: acessivel apenas pelos containers na rede interna (`db:3306`).
+
+Para abrir o MySQL no host apenas durante desenvolvimento local, suba com o
+override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.db-port.example.yml up -d
+```
+
+Esse override vincula a porta apenas em `127.0.0.1`.
 
 ### Credenciais Login
 
@@ -117,7 +126,8 @@ com os valores definidos no `.env` do Laravel:
 
 ```dotenv
 ADMIN_NAME=admin
-ADMIN_PASSWORD=pass
+ADMIN_PASSWORD=semear-local-admin-2026
+ADMIN_RESET_PASSWORD=false
 ```
 
 Altere a senha antes de usar a aplicação fora do ambiente local. O login usa

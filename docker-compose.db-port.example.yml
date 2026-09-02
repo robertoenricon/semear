@@ -1,0 +1,14 @@
+# ----------------------------------------------------------------------------
+# Override opcional para acessar o MySQL a partir do host.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.db-port.example.yml up -d
+#
+# A porta fica vinculada apenas ao loopback (127.0.0.1), evitando exposicao na
+# rede local. Em geral, prefira `docker compose exec db mysql ...`.
+# ----------------------------------------------------------------------------
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-3306}:3306"

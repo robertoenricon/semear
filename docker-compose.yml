@@ -4,7 +4,7 @@
 # Servicos:
 #   - app    : PHP-FPM 8.3 (executa a aplicacao Laravel)
 #   - nginx  : servidor web (porta 8080 no host)
-#   - db     : MySQL 8 (porta 3306 no host)
+#   - db     : MySQL 8 (acessivel apenas pela rede interna do Compose)
 #
 # As variaveis abaixo possuem valores padrao, mas podem ser sobrescritas
 # criando um arquivo ".env" na raiz (veja ".env.example").
@@ -55,17 +55,15 @@ services:
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-semear}
       MYSQL_USER: ${DB_USERNAME:-semear}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-    ports:
-      - "${DB_PORT:-3306}:3306"
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no .env da raiz}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Defina DB_ROOT_PASSWORD no .env da raiz}
     volumes:
       - db_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
     networks:
       - semear
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-root}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:?Defina DB_ROOT_PASSWORD no .env da raiz}"]
       interval: 10s
       timeout: 5s
       retries: 5
