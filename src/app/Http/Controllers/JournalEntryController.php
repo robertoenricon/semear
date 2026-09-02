@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JournalEntry;
+use App\Support\RichTextSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,10 @@ use Illuminate\Http\Request;
  */
 class JournalEntryController extends Controller
 {
+    public function __construct(private readonly RichTextSanitizer $sanitizer)
+    {
+    }
+
     /**
      * Lista as entradas do Semear em ordem decrescente de data.
      *
@@ -25,7 +30,8 @@ class JournalEntryController extends Controller
             ->journalEntries()
             ->orderByDesc('pinned')
             ->orderByDesc('entry_date')
-            ->get();
+            ->get()
+            ->map(fn (JournalEntry $entry) => $this->sanitizeEntryForResponse($entry));
 
         return response()->json($entries);
     }
@@ -46,7 +52,8 @@ class JournalEntryController extends Controller
             ->journalEntries()
             ->whereDate('entry_date', $date)
             ->orderBy('category')
-            ->get();
+            ->get()
+            ->map(fn (JournalEntry $entry) => $this->sanitizeEntryForResponse($entry));
 
         return response()->json($entries);
     }
@@ -78,8 +85,10 @@ class JournalEntryController extends Controller
 
         $entry->type = $data['type'] ?? null;
         $entry->title = $data['title'] ?? null;
-        $entry->content = $data['content'] ?? '';
-        $entry->feedback = $data['feedback'] ?? null;
+        $entry->content = $this->sanitizer->sanitize($data['content'] ?? '');
+        $entry->feedback = array_key_exists('feedback', $data) && $data['feedback'] !== null
+            ? $this->sanitizer->sanitize($data['feedback'])
+            : null;
         $entry->save();
 
         return response()->json($entry, 201);
@@ -111,8 +120,10 @@ class JournalEntryController extends Controller
         $journalEntry->entry_date = $data['entry_date'];
         $journalEntry->type = $data['type'] ?? null;
         $journalEntry->title = $data['title'] ?? null;
-        $journalEntry->content = $data['content'] ?? '';
-        $journalEntry->feedback = $data['feedback'] ?? null;
+        $journalEntry->content = $this->sanitizer->sanitize($data['content'] ?? '');
+        $journalEntry->feedback = array_key_exists('feedback', $data) && $data['feedback'] !== null
+            ? $this->sanitizer->sanitize($data['feedback'])
+            : null;
         $journalEntry->save();
 
         return response()->json($journalEntry);
@@ -178,5 +189,16 @@ class JournalEntryController extends Controller
         $journalEntry->delete();
 
         return response()->json(null, 204);
+    }
+
+    private function sanitizeEntryForResponse(JournalEntry $entry): JournalEntry
+    {
+        $entry->content = $this->sanitizer->sanitize($entry->content);
+
+        if ($entry->feedback !== null) {
+            $entry->feedback = $this->sanitizer->sanitize($entry->feedback);
+        }
+
+        return $entry;
     }
 }

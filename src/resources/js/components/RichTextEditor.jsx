@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { sanitizeRichTextHtml } from '../utils/html';
 
 /** Conjunto de emojis disponíveis no seletor rápido. */
 const EMOJIS = ['😀', '😊', '😍', '🥰', '😌', '😢', '😡', '😴', '🤔', '🙏', '❤️', '✨', '🌱', '☀️', '🌧️', '⭐'];
@@ -26,7 +27,7 @@ export default function RichTextEditor({ value, onChange, placeholder, showToolb
     useEffect(() => {
         const editor = editorRef.current;
         if (editor && editor.innerHTML !== value) {
-            editor.innerHTML = value || '';
+            editor.innerHTML = sanitizeRichTextHtml(value);
         }
     }, [value]);
 
@@ -59,8 +60,21 @@ export default function RichTextEditor({ value, onChange, placeholder, showToolb
     const emitChange = () => {
         const editor = editorRef.current;
         if (editor) {
-            onChange(editor.innerHTML, editor.textContent.length);
+            const clean = sanitizeRichTextHtml(editor.innerHTML);
+
+            if (editor.innerHTML !== clean) {
+                editor.innerHTML = clean;
+            }
+
+            onChange(clean, editor.textContent.length);
         }
+    };
+
+    const handlePaste = (event) => {
+        event.preventDefault();
+        const text = event.clipboardData?.getData('text/plain') || '';
+        document.execCommand('insertText', false, text);
+        emitChange();
     };
 
     /**
@@ -145,6 +159,7 @@ export default function RichTextEditor({ value, onChange, placeholder, showToolb
                 aria-multiline="true"
                 data-placeholder={placeholder}
                 onInput={emitChange}
+                onPaste={handlePaste}
                 suppressContentEditableWarning
             />
         </div>
