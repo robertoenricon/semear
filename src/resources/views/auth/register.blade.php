@@ -19,7 +19,7 @@
             @csrf
 
             <div>
-                <label for="name" class="login-form__label">Nome</label>
+                <label for="name" class="login-form__label">Usuário</label>
                 <input
                     id="name"
                     name="name"
@@ -30,7 +30,7 @@
                     required
                     autofocus
                 >
-                <p class="login-form__hint">De 3 a 255 caracteres. É o nome usado para entrar.</p>
+                <p class="login-form__hint">De 3 a 255 caracteres. É o usuário usado para entrar.</p>
             </div>
 
             <x-password-input
