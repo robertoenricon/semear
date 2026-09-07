@@ -1,8 +1,8 @@
 # Semear
 
-Controle sobre minhas terapias.
-
-Sistema para controle e acompanhamento de terapias.
+A ideia nasceu de uma necessidade real: criar um sistema de gestão pessoal para organizar meu dia a dia, quase como um diário online.
+Mas, além de resolver um problema meu, surgiu outra motivação: colocar em prática meus estudos em IA Generativa e Vibe Coding.
+Foi assim que uma necessidade pessoal virou um projeto real — usando IA não apenas para estudar, mas para construir, experimentar e aprender na prática.
 
 - **Backend:** PHP 8.3 / Laravel 12
 - **Frontend:** React.js
